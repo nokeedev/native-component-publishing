@@ -1,0 +1,24 @@
+plugins {
+	id 'groovy'
+	id 'java-gradle-plugin'
+}
+
+repositories {
+	mavenCentral()
+	maven { url = 'https://repo.nokee.dev/snapshot' }
+}
+
+gradlePlugin {
+	plugins {
+		jniLibraryPublish {
+			id = 'dev.nokee.samples.native-publish-convention'
+			implementationClass = 'dev.nokee.samples.NativePublishConventionPlugin'
+		}
+	}
+}
+
+dependencies {
+	compileOnly localGroovy()
+	compileOnly platform('dev.nokee:nokee-gradle-plugins:0.4.137-202106111656.58c572f9')
+	implementation 'dev.gradleplugins:grava-publish:1.0.1'
+}

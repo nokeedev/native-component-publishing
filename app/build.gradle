@@ -1,0 +1,37 @@
+import org.gradle.api.internal.artifacts.transform.UnzipTransform
+
+plugins {
+	id 'dev.nokee.cpp-application'
+}
+
+repositories {
+	maven { url = "${rootProject.buildDir}/publishing-repository" }
+}
+
+application {
+	targetMachines = [
+			machines.windows.x86_64,
+			machines.macOS.x86_64,
+			machines.linux.x86_64
+	]
+	dependencies {
+//		implementation project(':lib')
+		implementation 'com.example.greeter:lib:4.2'
+	}
+}
+
+tasks.register('foo') {
+	doLast {
+		println configurations.macosHeaderSearchPaths.incoming.files.asPath
+	}
+}
+
+afterEvaluate {
+configurations.macosHeaderSearchPaths.attributes {
+	attribute(Attribute.of("artifactType", String), "directory")
+}
+	dependencies.registerTransform(UnzipTransform) {
+		it.from.attribute(Attribute.of('artifactType', String), 'zip')
+		it.to.attribute(Attribute.of('artifactType', String), 'directory')
+	}
+}

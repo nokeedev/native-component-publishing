@@ -1,0 +1,21 @@
+pluginManagement {
+	repositories {
+		gradlePluginPortal()
+		maven { url = 'https://repo.nokee.dev/release' }
+		maven { url = 'https://repo.nokee.dev/snapshot' }
+	}
+	def nokeeVersion = "0.4.137-202106111656.58c572f9"
+	resolutionStrategy {
+		eachPlugin {
+			if (requested.id.id.startsWith('dev.nokee.')) {
+				useModule("${requested.id.id}:${requested.id.id}.gradle.plugin:${nokeeVersion}")
+			}
+		}
+	}
+}
+
+rootProject.name = 'publish-native-component'
+
+includeBuild 'gradle/plugins/native-publish-convention'
+
+include 'app', 'lib'

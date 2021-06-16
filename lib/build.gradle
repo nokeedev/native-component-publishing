@@ -1,0 +1,24 @@
+plugins {
+	id 'dev.nokee.cpp-library'
+	id 'maven-publish'
+	id 'dev.nokee.samples.native-publish-convention'
+}
+
+group = 'com.example.greeter'
+version = '4.2'
+
+library {
+	targetMachines = [
+		machines.windows.x86_64,
+		machines.macOS.x86_64,
+		machines.linux.x86_64
+	]
+}
+
+publishing {
+	repositories {
+		maven {
+			url = "${rootProject.buildDir}/publishing-repository"
+		}
+	}
+}
