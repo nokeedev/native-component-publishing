@@ -57,17 +57,16 @@ abstract class GenerateComponentGradleModuleMetadata extends DefaultTask {
         def moduleBuilder = GradleModuleMetadata.builder().formatVersion('1.1').component(GradleModuleMetadata.Component.ofComponent(groupId.get(), artifactId.get(), version.get()))
         for (def publication : publications) {
             def variant = findVariant(publication.name).orElseThrow { new RuntimeException("No variant for publication '${publication.name}'") }
-            def apiElements = configurations.getByName("${variant.identifier.name}ApiElements".uncapitalize())
-            def linkElements = configurations.getByName("${variant.identifier.name}LinkElements".uncapitalize())
+            Optional.ofNullable(configurations.findByName("${variant.identifier.name}ApiElements".uncapitalize())).ifPresent { apiElements ->
+                moduleBuilder.remoteVariant(variantBuilder(apiElements).andThen(availableAt(publication)))
+            }
+
+            Optional.ofNullable(configurations.findByName("${variant.identifier.name}LinkElements".uncapitalize())).ifPresent { linkElements ->
+                moduleBuilder.remoteVariant(variantBuilder(linkElements).andThen(availableAt(publication)))
+            }
+
             def runtimeElements = configurations.getByName("${variant.identifier.name}RuntimeElements".uncapitalize())
-
-            moduleBuilder.remoteVariant(variantBuilder(apiElements).andThen(availableAt(publication)))
-            moduleBuilder.remoteVariant(variantBuilder(linkElements).andThen(availableAt(publication)))
             moduleBuilder.remoteVariant(variantBuilder(runtimeElements).andThen(availableAt(publication)))
-
-//            moduleBuilder.localVariant(variantBuilder(apiElements).andThen(attachDependency(publication)))
-//            moduleBuilder.localVariant(variantBuilder(linkElements).andThen(attachDependency(publication)))
-//            moduleBuilder.localVariant(variantBuilder(runtimeElements).andThen(attachDependency(publication)))
         }
         GradleModuleMetadata.withWriter(moduleFile.get().asFile) { GradleModuleMetadataWriter out ->
             out.write(moduleBuilder.build())

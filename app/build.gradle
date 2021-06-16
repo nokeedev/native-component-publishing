@@ -2,7 +2,12 @@ import org.gradle.api.internal.artifacts.transform.UnzipTransform
 
 plugins {
 	id 'dev.nokee.cpp-application'
+	id 'maven-publish'
+	id 'dev.nokee.samples.native-publish-convention'
 }
+
+group = 'com.example.greeter'
+version = '4.2'
 
 repositories {
 	maven { url = "${rootProject.buildDir}/publishing-repository" }
@@ -14,9 +19,11 @@ application {
 			machines.macOS.x86_64,
 			machines.linux.x86_64
 	]
+
+	// Switch the dependencies to consume pre-built vs project
 	dependencies {
-//		implementation project(':lib')
-		implementation 'com.example.greeter:lib:4.2'
+		implementation project(':lib')
+//		implementation 'com.example.greeter:lib:4.2'
 	}
 }
 
@@ -27,11 +34,26 @@ tasks.register('foo') {
 }
 
 afterEvaluate {
-configurations.macosHeaderSearchPaths.attributes {
-	attribute(Attribute.of("artifactType", String), "directory")
+	// Ensure headers are resolve as directories, should be handled by Nokee soon
+	//  NOTE: The 'h' in headerSearchPaths can be lower or upper case depending on variants
+	configurations.matching { it.name.endsWith('eaderSearchPaths') }.all {
+		it.attributes {
+			attribute(Attribute.of("artifactType", String), "directory")
+		}
+	}
 }
-	dependencies.registerTransform(UnzipTransform) {
-		it.from.attribute(Attribute.of('artifactType', String), 'zip')
-		it.to.attribute(Attribute.of('artifactType', String), 'directory')
+
+// Allow to unzip headers, should be handle by Nokee soon
+dependencies.registerTransform(UnzipTransform) {
+	it.from.attribute(Attribute.of('artifactType', String), 'zip')
+	it.to.attribute(Attribute.of('artifactType', String), 'directory')
+}
+
+// Configure publishing location
+publishing {
+	repositories {
+		maven {
+			url = "${rootProject.buildDir}/publishing-repository"
+		}
 	}
 }

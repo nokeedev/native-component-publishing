@@ -15,6 +15,7 @@ library {
 	]
 }
 
+// Configure publishing location
 publishing {
 	repositories {
 		maven {
